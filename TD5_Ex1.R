@@ -1,4 +1,4 @@
-#Exercice 17
+#Exercice 1
 setwd("myDir")
 Cyclamen<-read.csv("TD5_Ex1.CSV",colClasses=c("factor","numeric","factor"))
 replications(Vitesse~Plante%in%Milieu, data=Cyclamen)
