@@ -6,7 +6,7 @@ library(lattice)
 xyplot(Vitesse~Milieu|Plante,data=Cyclamen,pch=19)
 
 replications(Vitesse~Milieu + Plante%in%Milieu, data=Cyclamen)
-Modele1 <- aov(Vitesse~Plante%in%Milieu,data=Cyclamen)
+Modele1 <- aov(Vitesse~Milieu + Plante%in%Milieu,data=Cyclamen)
 shapiro.test(residuals(Modele1))
 bartlett.test(residuals(Modele1),I((Cyclamen$Plante):(Cyclamen$Milieu)))
 summary(Modele1)
