@@ -36,4 +36,14 @@ with(enfants_long,wilcoxsign_test(score~group|jumeaux, distribution = "asymptoti
 #Nous vérifions que la valeur calculée par défaut dans ce cas par la fonction wilcox.test est la valeur "exacte".
 with(enfants_long,wilcoxsign_test(score~group|jumeaux, distribution = "exact"))
 
-
+foret = data.frame(hauteur=c(23.4, 24.4, 22.5, 22.9,
+24.6, 24.9, 23.7, 24.0,
+25.0, 26.2, 24.3, 24.5,
+26.3, 26.5, 25.3, 26.0,
+26.6, 26.8, 26.1, 26.4,
+27.0, 27.6, 26.7, 26.9,
+27.7, 27.4, 28.5),
+groupe=factor(c(rep(c(1,1,2,2),6),c(1,2,2))))
+foret
+tapply(rank(foret$hauteur),foret$groupe,sum)
+with(foret,plot(hauteur~groupe))
