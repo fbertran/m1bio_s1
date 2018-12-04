@@ -69,17 +69,17 @@ with(foret,wilcox.test(hauteur~groupe))
 
 
 pommes=data.frame(Variété=factor(rep(c("V1",
-"V2",
-"V3",
-"V4",
-"V5",
-"V6"),5)),Teneur.Vitamine.C=
-c(93.6 ,95.3 ,96.0 ,93.7 ,96.2,
-95.3 ,96.9 ,95.8 ,97.3 ,97.7,
-94.5 ,97.0 ,97.8 ,97.0 ,98.3,
-98.8 ,98.2 ,97.8 ,97.2 ,97.9,
-94.6 ,97.8 ,98.0 ,95.0 ,98.9,
-93.2 ,94.4 ,93.8 ,95.6 ,94.8))
+                                       "V2",
+                                       "V3",
+                                       "V4",
+                                       "V5",
+                                       "V6"),5)),Teneur.Vitamine.C=
+                    c(93.6 ,95.3 ,96.0 ,93.7 ,96.2,
+                      95.3 ,96.9 ,95.8 ,97.3 ,97.7,
+                      94.5 ,97.0 ,97.8 ,97.0 ,98.3,
+                      98.8 ,98.2 ,97.8 ,97.2 ,97.9,
+                      94.6 ,97.8 ,98.0 ,95.0 ,98.9,
+                      93.2 ,94.4 ,93.8 ,95.6 ,94.8))
 
 
 str(pommes)
@@ -101,7 +101,7 @@ shapiro.test(residuals(Model1))
 #Homogénéité
 bartlett.test(residuals(Model1)~pommes$Variété)
 
-  
+
 #La lecture de la $p$-valeur du test du tableau de l'analyse de la variance est légitime. Conclusion.
 
 summary(Model1)
@@ -137,10 +137,10 @@ library(coin)
 library(multcomp)
 library(car)
 Anova_oneway <- oneway_test(Teneur.Vitamine.C ~ Variété, data = pommes, 
-distribution = "asymptotic")
+                            distribution = "asymptotic")
 Anova_oneway_MC <- oneway_test(Teneur.Vitamine.C ~ Variété, 
-data = pommes, distribution = 
-approximate(B = 90000))
+                               data = pommes, distribution = 
+                                 approximate(B = 90000))
 
 #Anova\_oneway\_MC
 
@@ -153,13 +153,10 @@ print(Anova_oneway_MC)
 print(pvalue(Anova_oneway))
 print(pvalue(Anova_oneway_MC))
 if (pvalue(Anova_oneway_MC) <= 0.05) {
-Tukey_posthoc <- oneway_test(Teneur.Vitamine.C ~ Variété, data = exo1TD1,
-ytrafo = function(data) trafo(data, numeric_trafo = rank),
-xtrafo = function(data) trafo(data, factor_trafo = function(x)
-model.matrix(~x - 1) %*% t(contrMat(table(x), "Tukey"))),
-teststat = "max", distribution = approximate(B = 90000))
-###Posthocs
-print(pvalue(Tukey_posthoc, method = "single-step"))
+  Tukey_posthoc <- independence_test(Teneur.Vitamine.C ~ Variété, data = pommes, xtrafo = mcp_trafo(Variété = "Tukey"), distribution = approximate(B = 90000))
+  print(Tukey_posthoc)
+  ###Tukey Posthocs
+  print(pvalue(Tukey_posthoc, method = "step-down"))
 }
 
 
@@ -167,9 +164,144 @@ print(pvalue(Tukey_posthoc, method = "single-step"))
 
 print(leveneTest(pommes$Teneur.Vitamine.C,pommes$Variété))
 kruskalwallis <- kruskal_test(Teneur.Vitamine.C ~ Variété, data = pommes,
-distribution = "asymptotic")
+                              distribution = "asymptotic")
 kruskalwallis_MC <- kruskal_test(Teneur.Vitamine.C ~ Variété, data = pommes,
-distribution = approximate(B = 90000))
+                                 distribution = approximate(B = 90000))
+print(kruskalwallis)
+print(kruskalwallis_MC)
+
+
+#$p$-value KW
+
+print(pvalue(kruskalwallis))
+print(pvalue(kruskalwallis_MC))
+if(pvalue(kruskalwallis) <= 0.05) {
+  NDWD <- independence_test(Teneur.Vitamine.C ~ Variété, data = pommes,
+                            ytrafo = function(data) trafo(data, numeric_trafo = rank),
+                            xtrafo = mcp_trafo(Variété = "Tukey"), distribution = approximate(B = 90000))
+  #Variable
+  ### global p-value
+  print(pvalue(NDWD))
+  ### adjusted posthocs
+  print(pvalue(NDWD, method = "single-step")) }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rayonsX=data.frame(Dose=factor(rep(c("Dose0","Dose500","Dose1000","Dose2000","Dose3000"),rep(6,5))),Décès=c(2.5, 2.7, 1.5, 2.6, 2.4, 2.8, 5.0, 4.5, 3.5, 5.5, 4.0, 3.0, 10.0, 6.5, 8.0, 7.0, 7.5, 8.5, 30.0, 27.0, 26.0, 31.0, 29.0, 32.0, 46.5, 41.0, 43.0, 48.0, 45.0, 47.0))
+
+str(rayonsX)
+head(rayonsX)
+tail(rayonsX)
+
+with(rayonsX,plot(Dose,Décès))
+# Quel est le problème ?
+
+#Indiquons l'ordre des niveaux à R
+RayonsX=data.frame(Dose=factor(rep(c("Dose0","Dose500","Dose1000","Dose2000","Dose3000"),rep(6,5)),levels=c("Dose0","Dose500","Dose1000","Dose2000","Dose3000")),Décès=c(2.5, 2.7, 1.5, 2.6, 2.4, 2.8, 5.0, 4.5, 3.5, 5.5, 4.0, 3.0, 10.0, 6.5, 8.0, 7.0, 7.5, 8.5, 30.0, 27.0, 26.0, 31.0, 29.0, 32.0, 46.5, 41.0, 43.0, 48.0, 45.0, 47.0))
+with(RayonsX,plot(Dose,Décès))
+
+#Nous procédons au calcus de l'analyse de la variance de la variable \verb+Décès+ par la variable Dose la variable Bière
+
+Model1 <-aov(Décès~Dose, data=RayonsX)
+
+#Normalité
+
+qqnorm(residuals(Model1))
+qqline(residuals(Model1))
+shapiro.test(residuals(Model1))
+
+#Homogénéité
+bartlett.test(residuals(Model1)~RayonsX$Dose)
+
+
+#La lecture de la $p$-valeur du test du tableau de l'analyse de la variance est légitime. Conclusion.
+
+summary(Model1)
+
+oneway.test(Décès~Dose, var.equal=TRUE, data=RayonsX)
+
+
+#Voici les estimations des effets fixes du facteur Dose
+
+
+#Nous pouvons réaliser une comparaison individuelle à l'aide de la procédure de Tukey puisque l'hypothèse nulle a été rejetée.
+
+model.tables(Model1)
+
+TukeyHSD(Model1, "Dose", ordered = FALSE)
+plot(TukeyHSD(Model1, "Dose"))
+
+
+#Inférence conditionnelle
+#Tests de permutations (\verb+lmPerm+)
+
+library(pgirmess)
+Res_perm <- PermTest(Model1,B=1000)
+print(Res_perm)
+#Tests de permutations II (lmPerm)
+library("lmPerm")
+
+Model1.perm <-aovp(Décès~Dose, data=RayonsX)
+summary(Model1.perm)
+
+#Permutational Anova III, KW et post-hocs
+library(coin)
+library(multcomp)
+library(car)
+Anova_oneway <- oneway_test(Décès ~ Dose, data = RayonsX, 
+                            distribution = "asymptotic")
+Anova_oneway_MC <- oneway_test(Décès ~ Dose, 
+                               data = RayonsX, distribution = 
+                                 approximate(B = 90000))
+
+#Anova\_oneway\_MC
+
+print(Anova_oneway)
+print(Anova_oneway_MC)
+
+
+#IC $p$-value perm Anova\_oneway
+
+print(pvalue(Anova_oneway))
+print(pvalue(Anova_oneway_MC))
+if (pvalue(Anova_oneway_MC) <= 0.05) {
+  Tukey_posthoc <- independence_test(Décès ~ Dose, data = RayonsX, xtrafo = mcp_trafo(Dose = "Tukey"), distribution = approximate(B = 90000))
+  print(Tukey_posthoc)
+  ###Tukey Posthocs
+  print(pvalue(Tukey_posthoc, method = "step-down"))
+}
+
+
+#Test de Kruskal-Wallis
+
+print(leveneTest(RayonsX$Décès,RayonsX$Dose))
+kruskalwallis <- kruskal_test(Décès ~ Dose, data = RayonsX,
+                              distribution = "asymptotic")
+kruskalwallis_MC <- kruskal_test(Décès ~ Dose, data = RayonsX,
+                                 distribution = approximate(B = 90000))
 print(kruskalwallis)
 print(kruskalwallis_MC)
 
@@ -179,13 +311,12 @@ print(kruskalwallis_MC)
 print(pvalue(kruskalwallis))
 print(pvalue(kruskalwallis_MC))
 if (pvalue(kruskalwallis) <= 0.05) {
-NDWD <- oneway_test(Teneur.Vitamine.C ~ Variété, data = exo1TD1,
-ytrafo = function(data) trafo(data, numeric_trafo = rank),
-xtrafo = function(data) trafo(data, factor_trafo = function(x)
-model.matrix(~x - 1) %*% t(contrMat(table(x), "Tukey"))),
-teststat = "max", distribution = approximate(B = 90000))
-#Variable
-### global p-value
-print(pvalue(NDWD))
-### adjusted posthocs
-print(pvalue(NDWD, method = "single-step")) }
+  NDWD <- independence_test(Décès ~ Dose, data = RayonsX,
+                      ytrafo = function(data) trafo(data, numeric_trafo = rank),
+                      xtrafo = mcp_trafo(Dose = "Tukey"), distribution = approximate(B = 90000))
+  #Variable
+  ### global p-value
+  print(pvalue(NDWD))
+  ### adjusted posthocs
+  print(pvalue(NDWD, method = "step-down")) }
+
