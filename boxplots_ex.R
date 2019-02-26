@@ -22,6 +22,17 @@ abline(h=parambp$stats[4,],col="blue")
 parambp$stats[5,] #Limite moustache supérieure
 abline(h=parambp$stats[5,],col="pink")
 
+#Les outliers
+outliers=subset(data, data>parambp$stats[5,] | data<parambp$stats[1,])
+
+#Sans les outliers
+inlierss=subset(data, data<=parambp$stats[5,] & data>=parambp$stats[1,])
+#La boxplot construite sans les outliers, n'est évidemment pas la même que la précédente lorsque nous choisissons de ne pas afficher les outliers.
+layout(t(1:2))
+boxplot(data,outline=FALSE)
+boxplot(inlierss)
+layout(1)
+
 #Plus clair avec des données issues d'une loi normale centrée et réduite
 
 set.seed(123)
@@ -45,3 +56,6 @@ parambp$stats[4,] #3ème quartile
 abline(h=parambp$stats[4,],col="blue")
 parambp$stats[5,] #Limite moustache supérieure
 abline(h=parambp$stats[5,],col="pink")
+
+
+
